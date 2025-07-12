@@ -41,7 +41,7 @@ Email :- www.bittukumar.07@gmail.com
 
 MEMBER 2 : 
 NAME :- Jeetraj Raijada
-College :- RKU Rajkot
+College :- R.K.University Rajkot
 Degree :- BTECH CSE-IT
 YEAR & SEM :- 2RD , 3TH
 Email :- jeetrajraijada5@gmail.com
