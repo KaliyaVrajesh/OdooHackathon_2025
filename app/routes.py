@@ -7,10 +7,17 @@ except ImportError:
 from app import db
 from app.models import User, Skill, SwapRequest
 from app.forms import LoginForm, RegistrationForm, SkillForm, SwapRequestForm, ProfileSettingsForm
+from werkzeug.utils import secure_filename  # For secure filenames
+from flask import current_app  # For accessing app configuration
+import os  # For file path operations
 
 # ======================
 # Blueprint Initialization
 # ======================
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in current_app.config['ALLOWED_EXTENSIONS']
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 profile_bp = Blueprint('profile', __name__, url_prefix='/profile')
@@ -133,9 +140,11 @@ def reset_password(token):
 @profile_bp.route('')
 @login_required
 def view():
-    offered_skills = Skill.query.filter_by(offered_by_id=current_user.id).all()
-    wanted_skills = Skill.query.filter_by(wanted_by_id=current_user.id).all()
-    return render_template('profile/view.html', 
+    # Convert queries to lists using .all()
+    offered_skills = current_user.skills_offered.all()  # Evaluates the query
+    wanted_skills = current_user.skills_wanted.all()    # Evaluates the query
+    
+    return render_template('profile/view.html',
                          user=current_user,
                          offered_skills=offered_skills,
                          wanted_skills=wanted_skills)
@@ -144,27 +153,96 @@ def view():
 @login_required
 def edit():
     form = ProfileSettingsForm(obj=current_user)
+    
+    # Pre-populate skills fields for GET request
+    if request.method == 'GET':
+        form.skills_offered.data = ', '.join([s.name for s in current_user.skills_offered])
+        form.skills_wanted.data = ', '.join([s.name for s in current_user.skills_wanted])
+    
     if form.validate_on_submit():
-        # Check if username is being changed and if it's available
-        if form.username.data.strip() != current_user.username:
-            existing_user = User.query.filter_by(username=form.username.data.strip()).first()
-            if existing_user:
-                flash('Username already taken. Please choose a different username.', 'danger')
-                return redirect(url_for('profile.edit'))
-        
         try:
+            # Update basic info
             current_user.username = form.username.data.strip()
+            current_user.email = form.email.data.strip().lower()
             current_user.location = form.location.data.strip() if form.location.data else None
+            current_user.bio = form.bio.data.strip() if form.bio.data else None
             current_user.is_public = form.is_public.data
+            current_user.availability = form.availability.data
+
+            # Handle skills
+            current_user.skills_offered = []
+            current_user.skills_wanted = []
+            
+            # Process offered skills
+            if form.skills_offered.data:
+                for skill_name in [s.strip() for s in form.skills_offered.data.split(',') if s.strip()]:
+                    skill = Skill(
+                        name=skill_name,
+                        offered_by_id=current_user.id,
+                        availability=current_user.availability
+                    )
+                    db.session.add(skill)
+
+            # Process wanted skills
+            if form.skills_wanted.data:
+                for skill_name in [s.strip() for s in form.skills_wanted.data.split(',') if s.strip()]:
+                    skill = Skill(
+                        name=skill_name,
+                        wanted_by_id=current_user.id,
+                        availability=current_user.availability
+                    )
+                    db.session.add(skill)
+
             db.session.commit()
-            flash('Your profile has been updated!', 'success')
+            flash('Profile updated successfully!', 'success')
+            return redirect(url_for('profile.view'))
+            
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error updating profile: {str(e)}', 'danger')
+            current_app.logger.error(f"Profile update error: {str(e)}")
+    
+    return render_template('profile/edit.html', form=form)
+
+@profile_bp.route('/skill/<int:skill_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_skill(skill_id):
+    skill = Skill.query.get_or_404(skill_id)
+    
+    # Check if user owns this skill
+    if skill.offered_by_id != current_user.id and skill.wanted_by_id != current_user.id:
+        abort(403)
+    
+    form = SkillForm(obj=skill)
+    
+    # Pre-populate skill_type based on current skill
+    if skill.offered_by_id == current_user.id:
+        form.skill_type.data = 'offered'
+    else:
+        form.skill_type.data = 'wanted'
+    
+    if form.validate_on_submit():
+        try:
+            skill.name = form.name.data.strip()
+            skill.availability = form.availability.data.strip() if form.availability.data else None
+            
+            # Handle skill type change
+            if form.skill_type.data == 'offered':
+                skill.offered_by_id = current_user.id
+                skill.wanted_by_id = None
+            else:
+                skill.wanted_by_id = current_user.id
+                skill.offered_by_id = None
+            
+            db.session.commit()
+            flash(f'Skill "{skill.name}" has been updated!', 'success')
             return redirect(url_for('profile.view'))
         except Exception as e:
             db.session.rollback()
-            flash('An error occurred while updating your profile. Please try again.', 'danger')
-            return redirect(url_for('profile.edit'))
+            flash('An error occurred while updating the skill. Please try again.', 'danger')
+            return redirect(url_for('profile.edit_skill', skill_id=skill_id))
     
-    return render_template('profile/edit.html', form=form)
+    return render_template('profile/edit_skill.html', form=form, skill=skill)
 
 @profile_bp.route('/skill/add', methods=['GET', 'POST'])
 @login_required
@@ -180,16 +258,16 @@ def add_skill():
             )
             db.session.add(skill)
             db.session.commit()
-            
-            skill_type = "offered" if form.skill_type.data == 'offered' else "wanted"
-            flash(f'Skill "{skill.name}" added to your {skill_type} skills!', 'success')
+            flash(f'Skill "{skill.name}" added successfully!', 'success')
             return redirect(url_for('profile.view'))
         except Exception as e:
             db.session.rollback()
-            flash('An error occurred while adding the skill. Please try again.', 'danger')
-            return redirect(url_for('profile.add_skill'))
+            flash('An error occurred while adding the skill.', 'danger')
     
-    return render_template('profile/add_skill.html', form=form)
+    # Pass both form and current_user to the template
+    return render_template('profile/add_skill.html', 
+                         form=form,
+                         user=current_user)  # This fixes the error
 
 @profile_bp.route('/skill/<int:skill_id>/delete', methods=['POST'])
 @login_required
