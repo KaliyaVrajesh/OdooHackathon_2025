@@ -36,7 +36,7 @@ class Skill(db.Model):
     offered_by_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     wanted_by_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     availability = db.Column(db.String(100))  # e.g., "Weekends, Evenings"
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+  #  created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
         return f'<Skill {self.name}>'
