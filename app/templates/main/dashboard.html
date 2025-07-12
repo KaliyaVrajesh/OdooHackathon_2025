@@ -1,1 +1,271 @@
+{% extends "base.html" %}
 
+{% block title %}Dashboard - SkillSwap{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Welcome Section -->
+    <div class="row justify-content-center text-center mb-5">
+        <div class="col-lg-8">
+            <h1 class="display-4 fw-bold text-primary mb-4">
+                <i class="fas fa-tachometer-alt me-3"></i>Welcome back, {{ current_user.username }}!
+            </h1>
+            <p class="lead mb-4">
+                Your skill swapping hub. Manage your skills, track requests, and discover new opportunities.
+            </p>
+            <div class="d-flex gap-3 justify-content-center">
+                <a href="{{ url_for('profile.add_skill') }}" class="btn btn-primary btn-lg px-4">
+                    <i class="fas fa-plus me-2"></i>Add Skill
+                </a>
+                <a href="{{ url_for('swaps.browse') }}" class="btn btn-outline-primary btn-lg px-4">
+                    <i class="fas fa-search me-2"></i>Browse Skills
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Skills Overview Section -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm feature-card">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="feature-icon me-3">
+                            <i class="fas fa-gift fa-2x text-success"></i>
+                        </div>
+                        <h5 class="card-title fw-semibold mb-0">Skills You Offer</h5>
+                    </div>
+                    {% if offered_skills %}
+                        <div class="skills-list">
+                            {% for skill in offered_skills %}
+                                <span class="badge bg-success me-2 mb-2 p-2">
+                                    <i class="fas fa-star me-1"></i>{{ skill.name }}
+                                </span>
+                            {% endfor %}
+                        </div>
+                        <small class="text-muted">{{ offered_skills|length }} skill(s) available for sharing</small>
+                    {% else %}
+                        <p class="text-muted mb-3">No skills added yet. Share your expertise with the community!</p>
+                        <a href="{{ url_for('profile.add_skill') }}" class="btn btn-outline-success btn-sm">
+                            <i class="fas fa-plus me-1"></i>Add Your First Skill
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm feature-card">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="feature-icon me-3">
+                            <i class="fas fa-lightbulb fa-2x text-warning"></i>
+                        </div>
+                        <h5 class="card-title fw-semibold mb-0">Skills You Want</h5>
+                    </div>
+                    {% if wanted_skills %}
+                        <div class="skills-list">
+                            {% for skill in wanted_skills %}
+                                <span class="badge bg-warning text-dark me-2 mb-2 p-2">
+                                    <i class="fas fa-graduation-cap me-1"></i>{{ skill.name }}
+                                </span>
+                            {% endfor %}
+                        </div>
+                        <small class="text-muted">{{ wanted_skills|length }} skill(s) you're looking to learn</small>
+                    {% else %}
+                        <p class="text-muted mb-3">No learning goals set yet. What would you like to learn?</p>
+                        <a href="{{ url_for('profile.add_skill') }}" class="btn btn-outline-warning btn-sm">
+                            <i class="fas fa-plus me-1"></i>Add Learning Goal
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity Section -->
+    <div class="row justify-content-center mb-5">
+        <div class="col-lg-12">
+            <div class="card shadow">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h3 class="h4 mb-0 text-primary">
+                        <i class="fas fa-clock me-2"></i>Recent Swap Requests
+                    </h3>
+                    <a href="{{ url_for('swaps.manage_requests') }}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-list me-1"></i>View All
+                    </a>
+                </div>
+                <div class="card-body p-4">
+                    {% if recent_requests %}
+                        <div class="row g-3">
+                            {% for request in recent_requests %}
+                                <div class="col-12">
+                                    <div class="d-flex align-items-center justify-content-between p-3 border rounded">
+                                        <div class="d-flex align-items-center">
+                                            <div class="request-status me-3">
+                                                {% if request.status == 'pending' %}
+                                                    <i class="fas fa-hourglass-half text-warning"></i>
+                                                {% elif request.status == 'accepted' %}
+                                                    <i class="fas fa-check-circle text-success"></i>
+                                                {% elif request.status == 'rejected' %}
+                                                    <i class="fas fa-times-circle text-danger"></i>
+                                                {% endif %}
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-1">
+                                                    {% if request.sender_id == current_user.id %}
+                                                        Request sent to {{ request.receiver.username }}
+                                                    {% else %}
+                                                        Request from {{ request.sender.username }}
+                                                    {% endif %}
+                                                </h6>
+                                                <small class="text-muted">{{ request.created_at.strftime('%B %d, %Y at %I:%M %p') }}</small>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex align-items-center">
+                                            <span class="badge bg-{{ 'warning' if request.status == 'pending' else 'success' if request.status == 'accepted' else 'danger' }} me-2">
+                                                {{ request.status.title() }}
+                                            </span>
+                                            {% if request.receiver_id == current_user.id and request.status == 'pending' %}
+                                                <div class="btn-group btn-group-sm">
+                                                    <a href="{{ url_for('swaps.accept_request', request_id=request.id) }}" class="btn btn-outline-success">
+                                                        <i class="fas fa-check"></i>
+                                                    </a>
+                                                    <a href="{{ url_for('swaps.reject_request', request_id=request.id) }}" class="btn btn-outline-danger">
+                                                        <i class="fas fa-times"></i>
+                                                    </a>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                            <p class="text-muted mb-3">No swap requests yet. Start by browsing available skills!</p>
+                            <a href="{{ url_for('swaps.browse') }}" class="btn btn-primary">
+                                <i class="fas fa-search me-2"></i>Browse Skills
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions Section -->
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow">
+                <div class="card-header bg-light text-center">
+                    <h3 class="h4 mb-0 text-primary">
+                        <i class="fas fa-bolt me-2"></i>Quick Actions
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-4">
+                        <div class="col-md-3 text-center">
+                            <a href="{{ url_for('profile.view') }}" class="text-decoration-none">
+                                <div class="quick-action-card">
+                                    <div class="quick-action-icon mb-3">
+                                        <i class="fas fa-user fa-2x text-primary"></i>
+                                    </div>
+                                    <h6 class="fw-semibold text-dark">View Profile</h6>
+                                    <p class="text-muted small">Check your profile and settings</p>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <a href="{{ url_for('profile.edit') }}" class="text-decoration-none">
+                                <div class="quick-action-card">
+                                    <div class="quick-action-icon mb-3">
+                                        <i class="fas fa-edit fa-2x text-success"></i>
+                                    </div>
+                                    <h6 class="fw-semibold text-dark">Edit Profile</h6>
+                                    <p class="text-muted small">Update your information</p>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <a href="{{ url_for('swaps.manage_requests') }}" class="text-decoration-none">
+                                <div class="quick-action-card">
+                                    <div class="quick-action-icon mb-3">
+                                        <i class="fas fa-exchange-alt fa-2x text-warning"></i>
+                                    </div>
+                                    <h6 class="fw-semibold text-dark">Manage Swaps</h6>
+                                    <p class="text-muted small">View all your swap requests</p>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <a href="{{ url_for('swaps.browse') }}" class="text-decoration-none">
+                                <div class="quick-action-card">
+                                    <div class="quick-action-icon mb-3">
+                                        <i class="fas fa-search fa-2x text-info"></i>
+                                    </div>
+                                    <h6 class="fw-semibold text-dark">Find Skills</h6>
+                                    <p class="text-muted small">Discover new learning opportunities</p>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+    .feature-card {
+        transition: transform 0.2s ease-in-out;
+        border: none;
+    }
+    .feature-card:hover {
+        transform: translateY(-5px);
+    }
+    .feature-icon {
+        transition: transform 0.2s ease-in-out;
+    }
+    .feature-card:hover .feature-icon {
+        transform: scale(1.1);
+    }
+    .quick-action-card {
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        transition: all 0.2s ease-in-out;
+    }
+    .quick-action-card:hover {
+        background-color: #f8f9fa;
+        transform: translateY(-2px);
+    }
+    .quick-action-icon {
+        transition: transform 0.2s ease-in-out;
+    }
+    .quick-action-card:hover .quick-action-icon {
+        transform: scale(1.1);
+    }
+    .display-4 {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    .skills-list {
+        min-height: 60px;
+        margin-bottom: 1rem;
+    }
+    .badge {
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    .request-status {
+        font-size: 1.2rem;
+    }
+    .btn-group-sm > .btn {
+        padding: 0.25rem 0.5rem;
+    }
+</style>
+{% endblock %}
