@@ -1,1 +1,149 @@
+{% extends "base.html" %}
 
+{% block title %}Welcome to SkillSwap{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Hero Section -->
+    <div class="row justify-content-center text-center mb-5">
+        <div class="col-lg-8">
+            <h1 class="display-4 fw-bold text-primary mb-4">
+                <i class="fas fa-handshake me-3"></i>SkillSwap
+            </h1>
+            <p class="lead mb-4">
+                Connect with your community and exchange skills with others. 
+                Learn something new while sharing your expertise!
+            </p>
+            <div class="d-flex gap-3 justify-content-center">
+                <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg px-4">
+                    <i class="fas fa-user-plus me-2"></i>Get Started
+                </a>
+                <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary btn-lg px-4">
+                    <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm feature-card">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-users fa-3x text-primary"></i>
+                    </div>
+                    <h5 class="card-title fw-semibold">Connect with Community</h5>
+                    <p class="card-text text-muted">
+                        Find skilled individuals in your area and build meaningful connections 
+                        through skill sharing.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm feature-card">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-exchange-alt fa-3x text-success"></i>
+                    </div>
+                    <h5 class="card-title fw-semibold">Exchange Skills</h5>
+                    <p class="card-text text-muted">
+                        Trade your expertise for skills you want to learn. 
+                        It's a win-win for everyone involved!
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm feature-card">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-graduation-cap fa-3x text-warning"></i>
+                    </div>
+                    <h5 class="card-title fw-semibold">Learn & Grow</h5>
+                    <p class="card-text text-muted">
+                        Expand your skillset by learning from others while 
+                        sharing your own knowledge and experience.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- How It Works Section -->
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow">
+                <div class="card-header bg-light text-center">
+                    <h3 class="h4 mb-0 text-primary">
+                        <i class="fas fa-question-circle me-2"></i>How It Works
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-4">
+                        <div class="col-md-3 text-center">
+                            <div class="step-number mb-3">1</div>
+                            <h6 class="fw-semibold">Sign Up</h6>
+                            <p class="text-muted small">Create your account and set up your profile</p>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <div class="step-number mb-3">2</div>
+                            <h6 class="fw-semibold">Add Skills</h6>
+                            <p class="text-muted small">List skills you can offer and want to learn</p>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <div class="step-number mb-3">3</div>
+                            <h6 class="fw-semibold">Find Matches</h6>
+                            <p class="text-muted small">Browse and connect with other skill swappers</p>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <div class="step-number mb-3">4</div>
+                            <h6 class="fw-semibold">Start Swapping</h6>
+                            <p class="text-muted small">Begin exchanging skills and learning together</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+    .feature-card {
+        transition: transform 0.2s ease-in-out;
+        border: none;
+    }
+    .feature-card:hover {
+        transform: translateY(-5px);
+    }
+    .feature-icon {
+        transition: transform 0.2s ease-in-out;
+    }
+    .feature-card:hover .feature-icon {
+        transform: scale(1.1);
+    }
+    .step-number {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 1.2rem;
+        margin: 0 auto;
+        box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+    }
+    .display-4 {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+</style>
+{% endblock %}
