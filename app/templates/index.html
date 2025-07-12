@@ -1,1 +1,150 @@
+{% extends "base.html" %}
 
+{% block title %}Home - SkillSwap{% endblock %}
+
+{% block content %}
+<div class="hero-section bg-primary text-white py-5">
+    <div class="container text-center py-5">
+        <h1 class="display-4 fw-bold mb-4">Swap Skills, Grow Together</h1>
+        <p class="lead mb-5">Connect with people who can teach you what you want to learn, and share your own expertise in return.</p>
+        
+        {% if current_user.is_authenticated %}
+            <a href="{{ url_for('swaps.browse') }}" class="btn btn-light btn-lg px-4 me-2">
+                <i class="fas fa-search me-2"></i>Browse Skills
+            </a>
+            <a href="{{ url_for('profile.edit') }}" class="btn btn-outline-light btn-lg px-4">
+                <i class="fas fa-user-edit me-2"></i>Edit Profile
+            </a>
+        {% else %}
+            <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg px-4 me-2">
+                <i class="fas fa-user-plus me-2"></i>Join Now
+            </a>
+            <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg px-4">
+                <i class="fas fa-sign-in-alt me-2"></i>Login
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="container my-5">
+    <div class="row g-4">
+        <!-- How It Works -->
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex p-3 mb-3">
+                        <i class="fas fa-list-alt fa-2x text-primary"></i>
+                    </div>
+                    <h3 class="h4">List Your Skills</h3>
+                    <p class="text-muted">Share what you can teach and what you want to learn.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Browse Skills -->
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex p-3 mb-3">
+                        <i class="fas fa-search fa-2x text-primary"></i>
+                    </div>
+                    <h3 class="h4">Find Partners</h3>
+                    <p class="text-muted">Discover people with matching skills in your area.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Swap -->
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex p-3 mb-3">
+                        <i class="fas fa-exchange-alt fa-2x text-primary"></i>
+                    </div>
+                    <h3 class="h4">Start Swapping</h3>
+                    <p class="text-muted">Arrange skill exchanges that benefit both parties.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if not current_user.is_authenticated %}
+<div class="bg-light py-5">
+    <div class="container text-center">
+        <h2 class="mb-4">Ready to get started?</h2>
+        <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg px-4">
+            <i class="fas fa-rocket me-2"></i>Join Our Community
+        </a>
+    </div>
+</div>
+{% endif %}
+
+<!-- Testimonials -->
+<div class="container my-5 py-3">
+    <h2 class="text-center mb-5">What Our Users Say</h2>
+    <div class="row">
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex mb-3">
+                        <img src="https://i.pravatar.cc/60?img=1" class="rounded-circle me-3" alt="User">
+                        <div>
+                            <h5 class="mb-1">Sarah K.</h5>
+                            <p class="text-muted mb-0">Graphic Designer</p>
+                        </div>
+                    </div>
+                    <p class="card-text">"I learned photography basics while teaching Photoshop. Perfect win-win!"</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex mb-3">
+                        <img src="https://i.pravatar.cc/60?img=5" class="rounded-circle me-3" alt="User">
+                        <div>
+                            <h5 class="mb-1">Mike T.</h5>
+                            <p class="text-muted mb-0">Software Developer</p>
+                        </div>
+                    </div>
+                    <p class="card-text">"Traded Python lessons for Spanish practice. Best way to learn!"</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex mb-3">
+                        <img src="https://i.pravatar.cc/60?img=11" class="rounded-circle me-3" alt="User">
+                        <div>
+                            <h5 class="mb-1">Priya M.</h5>
+                            <p class="text-muted mb-0">Marketing Specialist</p>
+                        </div>
+                    </div>
+                    <p class="card-text">"Found a yoga instructor while teaching social media strategies."</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Additional scripts for landing page -->
+<script>
+// Example animation for features
+document.addEventListener('DOMContentLoaded', function() {
+    const features = document.querySelectorAll('.card');
+    features.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = `all 0.3s ease ${index * 0.1}s`;
+        setTimeout(() => {
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, 100);
+    });
+});
+</script>
+{% endblock %}
