@@ -1,1 +1,304 @@
+{% extends "base.html" %}
 
+{% block title %}Edit Profile - SkillSwap{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h4 mb-0">
+                        <i class="fas fa-user-edit me-2"></i> Edit Profile
+                    </h2>
+                </div>
+                <div class="card-body p-4">
+                    <!-- Flash Messages -->
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <form method="POST" enctype="multipart/form-data" id="profileForm" novalidate>
+                        <!-- Basic Information Section -->
+                        <div class="section-header mb-4">
+                            <h5 class="text-primary fw-semibold">
+                                <i class="fas fa-user me-2"></i>Basic Information
+                            </h5>
+                            <hr class="mt-2">
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" id="username" name="username" 
+                                               value="{{ user.name if user else '' }}" placeholder="Full Name" required>
+                                        <label for="name">Full Name *</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <div class="form-floating">
+                                        <input type="email" class="form-control" id="email" name="email" 
+                                               value="{{ user.email if user else '' }}" placeholder="Email Address" required>
+                                        <label for="email">Email Address *</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="location" name="location" 
+                                       value="{{ user.location if user else '' }}" placeholder="Location">
+                                <label for="location">Location (Optional)</label>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="form-floating">
+                                <textarea class="form-control" id="bio" name="bio" 
+                                          placeholder="Tell others about yourself..." style="height: 100px;">{{ user.bio if user else '' }}</textarea>
+                                <label for="bio">Bio</label>
+                            </div>
+                        </div>
+
+                        <!-- Profile Photo Section -->
+                        <div class="section-header mb-4">
+                            <h5 class="text-primary fw-semibold">
+                                <i class="fas fa-camera me-2"></i>Profile Photo
+                            </h5>
+                            <hr class="mt-2">
+                        </div>
+
+                        {% if user and user.profile_photo %}
+                            <div class="text-center mb-3">
+                                <img src="{{ url_for('static', filename='uploads/' + user.profile_photo) }}" 
+                                     alt="Current profile photo" class="rounded-circle border border-3 border-primary" 
+                                     style="width: 100px; height: 100px; object-fit: cover;">
+                                <p class="text-muted small mt-2">Current photo</p>
+                            </div>
+                        {% endif %}
+
+                        <div class="mb-4">
+                            <div class="input-group">
+                                <input type="file" class="form-control" id="profile_photo" name="profile_photo" accept="image/*">
+                                <label class="input-group-text" for="profile_photo">
+                                    <i class="fas fa-upload me-2"></i>Choose Photo
+                                </label>
+                            </div>
+                            <div class="form-text">Upload a new profile photo (optional)</div>
+                        </div>
+
+                        <!-- Skills Section -->
+                        <div class="section-header mb-4">
+                            <h5 class="text-primary fw-semibold">
+                                <i class="fas fa-tools me-2"></i>Skills & Availability
+                            </h5>
+                            <hr class="mt-2">
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-floating">
+                                <textarea class="form-control" id="skills_offered" name="skills_offered" 
+                                        placeholder="e.g., Web Development, Graphic Design, Photography..." style="height: 100px;">
+                                    {% for skill in user.skills_offered %}
+                                        {{ skill.name }}{% if not loop.last %}, {% endif %}
+                                    {% endfor %}
+                                </textarea>
+                            </div>
+                            <div class="form-text">Separate multiple skills with commas</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-floating">
+                                <textarea class="form-control" id="skills_wanted" name="skills_wanted" 
+                                          placeholder="e.g., Digital Marketing, Video Editing, Public Speaking..." style="height: 100px;">{{ user.skills_wanted if user else '' }}</textarea>
+                                <label for="skills_wanted">Skills I Want to Learn</label>
+                            </div>
+                            <div class="form-text">Separate multiple skills with commas</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="form-floating">
+                                <select class="form-select" id="availability" name="availability">
+                                    <option value="">Select your availability</option>
+                                    <option value="weekdays" {{ 'selected' if user and user.availability == 'weekdays' else '' }}>Weekdays</option>
+                                    <option value="weekends" {{ 'selected' if user and user.availability == 'weekends' else '' }}>Weekends</option>
+                                    <option value="evenings" {{ 'selected' if user and user.availability == 'evenings' else '' }}>Evenings</option>
+                                    <option value="flexible" {{ 'selected' if user and user.availability == 'flexible' else '' }}>Flexible</option>
+                                </select>
+                                <label for="availability">Availability</label>
+                            </div>
+                        </div>
+
+                        <!-- Privacy Settings Section -->
+                        <div class="section-header mb-4">
+                            <h5 class="text-primary fw-semibold">
+                                <i class="fas fa-shield-alt me-2"></i>Privacy Settings
+                            </h5>
+                            <hr class="mt-2">
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="is_public" name="is_public" value="1" 
+                                       {{ 'checked' if user and user.is_public else '' }}>
+                                <label class="form-check-label" for="is_public">
+                                    <strong>Make my profile public</strong>
+                                    <br>
+                                    <small class="text-muted">Others can find and contact me for skill swaps</small>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex gap-3">
+                            <a href="{{ url_for('profile.view') }}" class="btn btn-outline-secondary flex-fill">
+                                <i class="fas fa-times me-2"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary flex-fill">
+                                <i class="fas fa-save me-2"></i> Update Profile
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+    .section-header h5 {
+        margin-bottom: 0;
+    }
+    
+    .form-control.is-invalid {
+        border-color: #dc3545;
+        padding-right: calc(1.5em + 0.75rem);
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right calc(0.375em + 0.1875rem) center;
+        background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    }
+    
+    .form-check-input:checked {
+        background-color: var(--bs-primary);
+        border-color: var(--bs-primary);
+    }
+    
+    .card {
+        border: none;
+        border-radius: 0.5rem;
+    }
+    
+    .card-header {
+        border-bottom: none;
+        border-radius: 0.5rem 0.5rem 0 0 !important;
+    }
+    
+    .form-floating > .form-control:focus,
+    .form-floating > .form-select:focus {
+        border-color: var(--bs-primary);
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    
+    .btn-outline-secondary:hover {
+        background-color: #6c757d;
+        border-color: #6c757d;
+    }
+    
+    .section-header hr {
+        border-top: 2px solid var(--bs-primary);
+        opacity: 0.25;
+    }
+    
+    .form-text {
+        color: #6c757d;
+        font-size: 0.875rem;
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Form validation
+    document.getElementById('profileForm').addEventListener('submit', function(e) {
+        const name = document.getElementById('name').value.trim();
+        const email = document.getElementById('email').value.trim();
+        
+        // Reset previous error states
+        document.querySelectorAll('.is-invalid').forEach(el => {
+            el.classList.remove('is-invalid');
+        });
+        
+        let isValid = true;
+        
+        // Name validation
+        if (!name) {
+            document.getElementById('name').classList.add('is-invalid');
+            isValid = false;
+        }
+        
+        // Email validation
+        if (!email) {
+            document.getElementById('email').classList.add('is-invalid');
+            isValid = false;
+        } else {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                document.getElementById('email').classList.add('is-invalid');
+                isValid = false;
+            }
+        }
+        
+        if (!isValid) {
+            e.preventDefault();
+            // Scroll to first error
+            const firstError = document.querySelector('.is-invalid');
+            if (firstError) {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstError.focus();
+            }
+        }
+    });
+    
+    // File input feedback
+    document.getElementById('profile_photo').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        const label = document.querySelector('label[for="profile_photo"]');
+        
+        if (file) {
+            label.innerHTML = `<i class="fas fa-check me-2"></i>${file.name}`;
+            label.classList.add('text-success');
+        } else {
+            label.innerHTML = '<i class="fas fa-upload me-2"></i>Choose Photo';
+            label.classList.remove('text-success');
+        }
+    });
+    
+    // Real-time validation feedback
+    document.getElementById('name').addEventListener('input', function() {
+        if (this.value.trim()) {
+            this.classList.remove('is-invalid');
+        }
+    });
+    
+    document.getElementById('email').addEventListener('input', function() {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (this.value.trim() && emailRegex.test(this.value.trim())) {
+            this.classList.remove('is-invalid');
+        }
+    });
+</script>
+{% endblock %}
