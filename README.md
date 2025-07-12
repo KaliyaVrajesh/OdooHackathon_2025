@@ -2,8 +2,10 @@
 Lets see how we can perform in our first hackathon
 
 PROBLEM STATEMENT
--------------------------------------------------------------------------------------------------------------
-                                              Skill Swap Platform 
+
+*******************************************************************************************************************************************************
+SKill Swap Platform
+
 Overview: 
 Develop a Skill Swap Platform — a mini application that enables users to list their skills and 
 request others in return 
@@ -25,11 +27,11 @@ Admin Role
 ● Monitor pending, accepted, or cancelled swaps. 
 ● Send platform-wide messages (e.g., feature updates, downtime alerts). 
 ● Download reports of user activity, feedback logs, and swap stats.
--------------------------------------------------------------------------------------------------------------
+*******************************************************************************************************************************************************
 
 
 TEAM MEMBERS
--------------------------------------------------------------------------------------------------------------
+*******************************************************************************************************************************************************
 MEMEBER 1 (TL) : 
 NAME :- Kaliya Vrajeshkumar
 College :- G H PATEL COLLEGE OF ENGINEERING AND TECHNOLOGY (GCET)
@@ -43,4 +45,4 @@ College :- RKU Rajkot
 Degree :- BTECH CSE-IT
 YEAR & SEM :- 2RD , 3TH
 Email :- jeetrajraijada5@gmail.com
--------------------------------------------------------------------------------------------------------------
+*******************************************************************************************************************************************************
